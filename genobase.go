@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Zymatik Genobase - A genomics database for the Zymatik project.
+ * Zymatik Genobase - A Human Genomics reference database.
  * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -76,99 +75,6 @@ func Open(ctx context.Context, logger *slog.Logger, dbPath string, noSync bool) 
 
 func (db *DB) Close() error {
 	return db.db.Close()
-}
-
-func (db *DB) GetChain(ctx context.Context, fromReference, chromosome string, position int64) (*types.Chain, error) {
-	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM liftover_chain WHERE ref = ? AND ref_name = ? AND ref_start <= ? AND ref_end >= ? LIMIT 1",
-		fromReference, chromosome, position, position)
-	if err != nil {
-		return nil, fmt.Errorf("could not query chains: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		if err := rows.Err(); err != nil {
-			return nil, err
-		}
-
-		return nil, fmt.Errorf("no chain found: %w", os.ErrNotExist)
-	}
-
-	var chain types.Chain
-	if err := rows.StructScan(&chain); err != nil {
-		return nil, fmt.Errorf("could not unmarshal chain: %w", err)
-	}
-
-	return &chain, nil
-}
-
-func (db *DB) StoreChain(ctx context.Context, fromReference string, chain *types.Chain) (int64, error) {
-	result, err := db.db.NamedExecContext(ctx, `
-		INSERT INTO liftover_chain (
-			score, ref, ref_name, ref_size, ref_strand, 
-			ref_start, ref_end, query_name, query_size, 
-			query_strand, query_start, query_end
-		) VALUES (
-			:score, :ref, :ref_name, :ref_size, :ref_strand, 
-			:ref_start, :ref_end, :query_name, :query_size, 
-			:query_strand, :query_start, :query_end
-		)`, chain)
-	if err != nil {
-		return -1, fmt.Errorf("could not store chain: %w", err)
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return -1, fmt.Errorf("could not get chain id: %w", err)
-	}
-
-	return id, nil
-}
-
-func (db *DB) GetAlignment(ctx context.Context, chainID, refOffset int64) (*types.Alignment, error) {
-	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM liftover_alignment WHERE chain_id = ? AND ref_offset + size >= ? ORDER BY ref_offset ASC LIMIT 1",
-		chainID, refOffset)
-	if err != nil {
-		return nil, fmt.Errorf("could not query alignments: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		if err := rows.Err(); err != nil {
-			return nil, err
-		}
-
-		return nil, fmt.Errorf("no alignment found: %w", os.ErrNotExist)
-	}
-
-	var alignment types.Alignment
-	if err := rows.StructScan(&alignment); err != nil {
-		return nil, fmt.Errorf("could not unmarshal alignment: %w", err)
-	}
-
-	return &alignment, nil
-}
-
-func (db *DB) StoreAlignments(ctx context.Context, chainID int64, alignments []types.Alignment) error {
-	tx, err := db.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("could not start transaction: %w", err)
-	}
-
-	for _, alignment := range alignments {
-		alignment.ChainID = chainID
-
-		if _, err := tx.NamedExecContext(ctx, `INSERT INTO liftover_alignment (chain_id, ref_offset, query_offset, size) 
-			VALUES (:chain_id, :ref_offset, :query_offset, :size)`, alignment); err != nil {
-			return fmt.Errorf("could not store alignment: %w", err)
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("could not commit transaction: %w", err)
-	}
-
-	return nil
 }
 
 func (db *DB) GetVariant(ctx context.Context, id int64) (*types.Variant, error) {
@@ -326,16 +232,95 @@ func (db *DB) StoreAlleles(ctx context.Context, alleles []types.Allele) error {
 	return nil
 }
 
-type gooseLogger struct {
-	*slog.Logger
+func (db *DB) GetChain(ctx context.Context, from types.Reference, chromosome string, position int64) (*types.Chain, error) {
+	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM liftover_chain WHERE ref = ? AND ref_name = ? AND ref_start <= ? AND ref_end >= ? LIMIT 1",
+		from, chromosome, position, position)
+	if err != nil {
+		return nil, fmt.Errorf("could not query chains: %w", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
+
+		return nil, fmt.Errorf("no chain found: %w", os.ErrNotExist)
+	}
+
+	var chain types.Chain
+	if err := rows.StructScan(&chain); err != nil {
+		return nil, fmt.Errorf("could not unmarshal chain: %w", err)
+	}
+
+	return &chain, nil
 }
 
-func (l *gooseLogger) Printf(format string, v ...any) {
-	l.Logger.Info(strings.TrimSpace(fmt.Sprintf(format, v...)))
+func (db *DB) StoreChain(ctx context.Context, from types.Reference, chain *types.Chain) (int64, error) {
+	result, err := db.db.NamedExecContext(ctx, `
+		INSERT INTO liftover_chain (
+			score, ref, ref_name, ref_size, ref_strand, 
+			ref_start, ref_end, query_name, query_size, 
+			query_strand, query_start, query_end
+		) VALUES (
+			:score, :ref, :ref_name, :ref_size, :ref_strand, 
+			:ref_start, :ref_end, :query_name, :query_size, 
+			:query_strand, :query_start, :query_end
+		)`, chain)
+	if err != nil {
+		return -1, fmt.Errorf("could not store chain: %w", err)
+	}
 
+	id, err := result.LastInsertId()
+	if err != nil {
+		return -1, fmt.Errorf("could not get chain id: %w", err)
+	}
+
+	return id, nil
 }
 
-func (l *gooseLogger) Fatalf(format string, v ...any) {
-	l.Logger.Error(strings.TrimSpace(fmt.Sprintf(format, v...)))
-	os.Exit(1)
+func (db *DB) GetAlignment(ctx context.Context, chainID, refOffset int64) (*types.Alignment, error) {
+	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM liftover_alignment WHERE chain_id = ? AND ref_offset + size >= ? ORDER BY ref_offset ASC LIMIT 1",
+		chainID, refOffset)
+	if err != nil {
+		return nil, fmt.Errorf("could not query alignments: %w", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
+
+		return nil, fmt.Errorf("no alignment found: %w", os.ErrNotExist)
+	}
+
+	var alignment types.Alignment
+	if err := rows.StructScan(&alignment); err != nil {
+		return nil, fmt.Errorf("could not unmarshal alignment: %w", err)
+	}
+
+	return &alignment, nil
+}
+
+func (db *DB) StoreAlignments(ctx context.Context, chainID int64, alignments []types.Alignment) error {
+	tx, err := db.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("could not start transaction: %w", err)
+	}
+
+	for _, alignment := range alignments {
+		alignment.ChainID = chainID
+
+		if _, err := tx.NamedExecContext(ctx, `INSERT INTO liftover_alignment (chain_id, ref_offset, query_offset, size) 
+			VALUES (:chain_id, :ref_offset, :query_offset, :size)`, alignment); err != nil {
+			return fmt.Errorf("could not store alignment: %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("could not commit transaction: %w", err)
+	}
+
+	return nil
 }

@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Zymatik Genobase - A genomics database for the Zymatik project.
+ * Zymatik Genobase - A Human Genomics reference database.
  * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -118,5 +118,68 @@ func TestGenobase(t *testing.T) {
 		assert.Len(t, alleleList, 1)
 		assert.Equal(t, alleleList[0].ID, int64(4680))
 		assert.Equal(t, alleleList[0].Ancestry, types.AncestryGroupAll)
+	})
+
+	t.Run("Liftover", func(t *testing.T) {
+		chain := &types.Chain{
+			Score:       1,
+			Ref:         types.ReferenceGRCh37,
+			RefName:     "1",
+			RefSize:     249250621,
+			RefStrand:   "+",
+			RefStart:    10000,
+			RefEnd:      267719,
+			QueryName:   "1",
+			QuerySize:   248956422,
+			QueryStrand: "+",
+			QueryStart:  10000,
+			QueryEnd:    297968,
+		}
+
+		chainID, err := db.StoreChain(ctx, types.ReferenceGRCh37, chain)
+		require.NoError(t, err)
+
+		assert.Equal(t, chainID, int64(1))
+
+		alignments := []types.Alignment{{
+			ChainID:     chainID,
+			RefOffset:   0,
+			QueryOffset: 0,
+			Size:        167417,
+		}, {
+			ChainID:     chainID,
+			RefOffset:   217417,
+			QueryOffset: 247666,
+			Size:        40302,
+		}}
+
+		err = db.StoreAlignments(ctx, chainID, alignments)
+		require.NoError(t, err)
+
+		retrievedChain, err := db.GetChain(ctx, types.ReferenceGRCh37, "1", 217480)
+		require.NoError(t, err)
+
+		assert.Equal(t, retrievedChain.ID, chainID)
+		assert.Equal(t, retrievedChain.Score, int64(1))
+		assert.Equal(t, retrievedChain.Ref, types.ReferenceGRCh37)
+		assert.Equal(t, retrievedChain.RefName, "1")
+		assert.Equal(t, retrievedChain.RefSize, int64(249250621))
+		assert.Equal(t, retrievedChain.RefStrand, "+")
+		assert.Equal(t, retrievedChain.RefStart, int64(10000))
+		assert.Equal(t, retrievedChain.RefEnd, int64(267719))
+		assert.Equal(t, retrievedChain.QueryName, "1")
+		assert.Equal(t, retrievedChain.QuerySize, int64(248956422))
+		assert.Equal(t, retrievedChain.QueryStrand, "+")
+		assert.Equal(t, retrievedChain.QueryStart, int64(10000))
+		assert.Equal(t, retrievedChain.QueryEnd, int64(297968))
+
+		retrievedAlignment, err := db.GetAlignment(ctx, chainID, 217480)
+		require.NoError(t, err)
+
+		assert.NotZero(t, retrievedAlignment.ID)
+		assert.Equal(t, retrievedAlignment.ChainID, chainID)
+		assert.Equal(t, retrievedAlignment.RefOffset, int64(217417))
+		assert.Equal(t, retrievedAlignment.QueryOffset, int64(247666))
+		assert.Equal(t, retrievedAlignment.Size, int64(40302))
 	})
 }
