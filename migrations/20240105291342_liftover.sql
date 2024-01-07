@@ -1,6 +1,19 @@
 -- +goose Up
 -- +goose StatementBegin
 
+-- The `reference` table stores information about known reference genome assemblies.
+CREATE TABLE reference (
+    id TEXT NOT NULL PRIMARY KEY,
+    description TEXT
+);
+
+-- Populate the `reference` table with common/supported reference genome assemblies.
+INSERT INTO reference (id, description) VALUES
+    ('NCBI36', 'NCBI Build 36'),
+    ('GRCh37', 'Genome Reference Consortium Human Build 37'),
+    ('GRCh38', 'Genome Reference Consortium Human Build 38'),
+    ('T2T-CHM13v2.0', 'Telomere-to-Telomere Consortium Human Genome Assembly v2.0');
+
 -- We store the liftover chains in a database so that we can query them
 -- efficiently. The `liftover_chain` table stores the chain metadata, and 
 -- the `liftover_alignment` table stores the alignment blocks.
@@ -31,6 +44,7 @@ CREATE TABLE liftover_chain (
     query_start INTEGER,
     -- End position in the query genome.
     query_end INTEGER,
+    FOREIGN KEY (ref) REFERENCES reference (id),
     FOREIGN KEY (ref_name) REFERENCES chromosome (id),
     FOREIGN KEY (query_name) REFERENCES chromosome (id)
 );
@@ -62,5 +76,7 @@ CREATE INDEX liftover_alignment_ref_offset ON liftover_alignment(ref_offset);
 DROP TABLE liftover_alignment;
 
 DROP TABLE liftover_chain;
+
+DROP TABLE reference;
 
 -- +goose StatementEnd

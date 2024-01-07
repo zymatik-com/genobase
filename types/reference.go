@@ -23,7 +23,8 @@ package types
 type Reference string
 
 const (
-	ReferenceNCBI36 Reference = "NCBI36"
-	ReferenceGRCh37 Reference = "GRCh37"
-	ReferenceGRCh38 Reference = "GRCh38"
+	ReferenceNCBI36               Reference = "NCBI36"
+	ReferenceGRCh37               Reference = "GRCh37"
+	ReferenceGRCh38               Reference = "GRCh38"
+	ReferenceTelomereToTelomereV2 Reference = "T2T-CHM13v2.0"
 )
