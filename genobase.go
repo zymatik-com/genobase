@@ -156,8 +156,8 @@ func (db *DB) StoreVariants(ctx context.Context, variants []types.Variant) error
 }
 
 func (db *DB) GetAllele(ctx context.Context, id int64, reference, alternate string, ancestry types.AncestryGroup) (*types.Allele, error) {
-	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM allele WHERE id = ? AND alt = ? AND ancestry = ? LIMIT 1",
-		id, alternate, ancestry)
+	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM allele WHERE id = ? AND ref = ? AND alt = ? AND ancestry = ? LIMIT 1",
+		id, reference, alternate, ancestry)
 	if err != nil {
 		return nil, fmt.Errorf("could not query alleles: %w", err)
 	}
