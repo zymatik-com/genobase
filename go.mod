@@ -3,6 +3,7 @@ module github.com/zymatik-com/genobase
 go 1.21.0
 
 require (
+	github.com/FastFilter/xorfilter v0.1.4
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/neilotoole/slogt v1.1.0
@@ -11,6 +12,7 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sethvargo/go-retry v0.2.4 // indirect
