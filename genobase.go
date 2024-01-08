@@ -26,7 +26,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/FastFilter/xorfilter"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pressly/goose/v3"
@@ -232,28 +231,28 @@ func (db *DB) StoreAlleles(ctx context.Context, alleles []types.Allele) error {
 	return nil
 }
 
-func (db *DB) KnownAlleles(ctx context.Context) (*xorfilter.BinaryFuse8, error) {
+func (db *DB) KnownAlleles(ctx context.Context) (map[int64]bool, error) {
 	rows, err := db.db.QueryxContext(ctx, "SELECT DISTINCT id FROM allele")
 	if err != nil {
 		return nil, fmt.Errorf("could not query alleles: %w", err)
 	}
 	defer rows.Close()
 
-	var keys []uint64
+	entries := make(map[int64]bool)
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
 			return nil, fmt.Errorf("could not scan allele: %w", err)
 		}
 
-		keys = append(keys, uint64(id))
+		entries[id] = true
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("could not scan alleles: %w", err)
 	}
 
-	return xorfilter.PopulateBinaryFuse8(keys)
+	return entries, nil
 }
 
 func (db *DB) GetChain(ctx context.Context, from types.Reference, chromosome string, position int64) (*types.Chain, error) {

@@ -116,12 +116,12 @@ func TestGenobase(t *testing.T) {
 		assert.Equal(t, alleleList[0].ID, int64(4680))
 		assert.Equal(t, alleleList[0].Ancestry, types.AncestryGroupAll)
 
-		filter, err := db.KnownAlleles(ctx)
+		KnownAlleles, err := db.KnownAlleles(ctx)
 		require.NoError(t, err)
 
-		assert.True(t, filter.Contains(4680))
-		assert.True(t, filter.Contains(334))
-		assert.False(t, filter.Contains(1))
+		assert.Contains(t, KnownAlleles, int64(4680))
+		assert.Contains(t, KnownAlleles, int64(334))
+		assert.NotContains(t, KnownAlleles, int64(1))
 	})
 
 	t.Run("Liftover", func(t *testing.T) {
