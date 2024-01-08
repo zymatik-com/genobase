@@ -1,3 +1,3 @@
 # Genobase
 
-A Human Genomics reference database.
+A human genomics reference DB.

@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Zymatik Genobase - A Human Genomics reference database.
+ * Zymatik Genobase - A human genomics reference DB.
  * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,14 +45,12 @@ func TestGenobase(t *testing.T) {
 				ID:         4680,
 				Chromosome: "22",
 				Position:   19963748,
-				Reference:  "G",
 				Class:      types.VariantClassSNV,
 			},
 			{
 				ID:         334,
 				Chromosome: "11",
 				Position:   5227002,
-				Reference:  "T",
 				Class:      types.VariantClassSNV,
 			},
 		}
@@ -65,7 +63,6 @@ func TestGenobase(t *testing.T) {
 		assert.Equal(t, variant.ID, int64(4680))
 		assert.Equal(t, variant.Chromosome, "22")
 		assert.Equal(t, variant.Position, int64(19963748))
-		assert.Equal(t, variant.Reference, "G")
 		assert.Equal(t, variant.Class, types.VariantClassSNV)
 	})
 

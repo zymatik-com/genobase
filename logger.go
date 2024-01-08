@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Zymatik Genobase - A Human Genomics reference database.
+ * Zymatik Genobase - A human genomics reference DB.
  * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>
  *
  * This program is free software: you can redistribute it and/or modify

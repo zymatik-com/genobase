@@ -65,8 +65,6 @@ CREATE TABLE variant (
     chromosome TEXT,
     -- The position of the variant on the chromosome.
     position INTEGER,
-    -- The reference base(s) at the variant's position.
-    ref TEXT,
     -- The class of the variant, e.g., SNV, INDEL, INS, DEL, MNV.
     class TEXT,
     FOREIGN KEY (chromosome) REFERENCES chromosome (id),

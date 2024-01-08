@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Zymatik Genobase - A Human Genomics reference database.
+ * Zymatik Genobase - A human genomics reference DB.
  * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -132,12 +132,11 @@ func (db *DB) StoreVariants(ctx context.Context, variants []types.Variant) error
 		return fmt.Errorf("could not start transaction: %w", err)
 	}
 
-	stmt, err := tx.PrepareNamedContext(ctx, `INSERT INTO variant (id, chromosome, position, ref, class) 
-	  VALUES (:id, :chromosome, :position, :ref, :class)
+	stmt, err := tx.PrepareNamedContext(ctx, `INSERT INTO variant (id, chromosome, position, class) 
+	  VALUES (:id, :chromosome, :position, :class)
       ON CONFLICT(id) DO UPDATE SET 
         chromosome = excluded.chromosome, 
         position = excluded.position,
-		ref = excluded.ref,
 		class = excluded.class`)
 	if err != nil {
 		return fmt.Errorf("could not prepare statement: %w", err)

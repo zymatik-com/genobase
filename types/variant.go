@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Zymatik Genobase - A Human Genomics reference database.
+ * Zymatik Genobase - A human genomics reference DB.
  * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,7 +40,6 @@ type Variant struct {
 	ID         int64        `db:"id"`         // Unique ID of the variant (RSID).
 	Chromosome string       `db:"chromosome"` // Chromosome on which the variant is located.
 	Position   int64        `db:"position"`   // Position of the variant on the chromosome.
-	Reference  string       `db:"ref"`        // Reference base(s) at the variant's position.
 	Class      VariantClass `db:"class"`      // Class of the variant, e.g., SNV, INDEL, INS, DEL, MNV.
 }
 
