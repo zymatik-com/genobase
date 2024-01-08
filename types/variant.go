@@ -67,6 +67,8 @@ const (
 	AncestryGroupEuropean AncestryGroup = "NFE"
 	// AncestryGroupSouthAsian is the South Asian ancestry group.
 	AncestryGroupSouthAsian AncestryGroup = "SAS"
+	// AncestryGroupOther encompasses all other ancestry groups.
+	AncestryGroupOther AncestryGroup = "OTH"
 )
 
 // Allele is an allele of a genomic variant.
