@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -50,15 +51,17 @@ func Open(ctx context.Context, logger *slog.Logger, dbPath string, opts ...Optio
 		return nil, fmt.Errorf("could not open database: %w", err)
 	}
 
-	goose.SetLogger(&gooseLogger{logger})
-	goose.SetBaseFS(embedMigrations)
+	if !strings.Contains(connStr, "mode=ro") {
+		goose.SetLogger(&gooseLogger{logger})
+		goose.SetBaseFS(embedMigrations)
 
-	if err := goose.SetDialect("sqlite3"); err != nil {
-		return nil, fmt.Errorf("could not set dialect: %w", err)
-	}
+		if err := goose.SetDialect("sqlite3"); err != nil {
+			return nil, fmt.Errorf("could not set dialect: %w", err)
+		}
 
-	if err := goose.UpContext(ctx, db.DB, "migrations"); err != nil {
-		return nil, fmt.Errorf("could not apply migrations: %w", err)
+		if err := goose.UpContext(ctx, db.DB, "migrations"); err != nil {
+			return nil, fmt.Errorf("could not apply migrations: %w", err)
+		}
 	}
 
 	return &DB{
