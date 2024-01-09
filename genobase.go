@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -39,8 +40,33 @@ type DB struct {
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
+type Option func(string) string
+
+// ReadOnly makes the database read-only (allowing for multiple concurrent readers).
+func ReadOnly(connStr string) string {
+	if !strings.Contains(connStr, "?") {
+		connStr += "?"
+	} else {
+		connStr += "&"
+	}
+
+	return connStr + "mode=ro"
+}
+
+// NoSync disables flushing the database to disk after each write.
+// This is unsafe, but significantly speeds up bulk imports.
+func NoSync(connStr string) string {
+	if !strings.Contains(connStr, "?") {
+		connStr += "?"
+	} else {
+		connStr += "&"
+	}
+
+	return connStr + "_journal_mode=OFF&_synchronous=OFF"
+}
+
 // Open opens a database connection and applies any necessary migrations.
-func Open(ctx context.Context, logger *slog.Logger, dbPath string, noSync bool) (*DB, error) {
+func Open(ctx context.Context, logger *slog.Logger, dbPath string, opts ...Option) (*DB, error) {
 	var connStr string
 
 	// So that we can use an in-memory database for testing.
@@ -48,8 +74,8 @@ func Open(ctx context.Context, logger *slog.Logger, dbPath string, noSync bool) 
 		connStr = fmt.Sprintf("file:%s", dbPath)
 	}
 
-	if noSync {
-		connStr += "?_journal_mode=OFF&_synchronous=OFF"
+	for _, opt := range opts {
+		connStr = opt(connStr)
 	}
 
 	db, err := sqlx.Connect("sqlite3", connStr)

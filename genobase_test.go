@@ -33,7 +33,7 @@ import (
 func TestGenobase(t *testing.T) {
 	ctx := context.Background()
 
-	db, err := genobase.Open(ctx, slogt.New(t), "", false)
+	db, err := genobase.Open(ctx, slogt.New(t), "")
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		require.NoError(t, db.Close())
