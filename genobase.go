@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -32,31 +31,6 @@ type DB struct {
 
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
-
-type Option func(string) string
-
-// ReadOnly makes the database read-only (allowing for multiple concurrent readers).
-func ReadOnly(connStr string) string {
-	if !strings.Contains(connStr, "?") {
-		connStr += "?"
-	} else {
-		connStr += "&"
-	}
-
-	return connStr + "mode=ro"
-}
-
-// NoSync disables flushing the database to disk after each write.
-// This is unsafe, but significantly speeds up bulk imports.
-func NoSync(connStr string) string {
-	if !strings.Contains(connStr, "?") {
-		connStr += "?"
-	} else {
-		connStr += "&"
-	}
-
-	return connStr + "_journal_mode=OFF&_synchronous=OFF"
-}
 
 // Open opens a database connection and applies any necessary migrations.
 func Open(ctx context.Context, logger *slog.Logger, dbPath string, opts ...Option) (*DB, error) {
@@ -199,7 +173,7 @@ func (db *DB) GetAllele(ctx context.Context, id int64, reference, alternate stri
 }
 
 func (db *DB) GetAlleles(ctx context.Context, id int64) ([]types.Allele, error) {
-	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM allele WHERE id = ?", id)
+	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM allele WHERE id = ? AND ancestry = 'ALL'", id)
 	if err != nil {
 		return nil, fmt.Errorf("could not query alleles: %w", err)
 	}
