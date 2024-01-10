@@ -251,7 +251,7 @@ func (db *DB) KnownAlleles(ctx context.Context) (map[int64]bool, error) {
 	return entries, nil
 }
 
-func (db *DB) GetChain(ctx context.Context, from types.Reference, chromosome string, position int64) (*types.Chain, error) {
+func (db *DB) GetChain(ctx context.Context, from types.Reference, chromosome types.Chromosome, position int64) (*types.Chain, error) {
 	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM liftover_chain WHERE ref = ? AND ref_name = ? AND ref_start <= ? AND ref_end >= ? LIMIT 1",
 		from, chromosome, position, position)
 	if err != nil {
