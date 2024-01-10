@@ -35,7 +35,7 @@ INSERT INTO chromosome (id, description) VALUES
     ('X', 'Chromosome X'),
     ('Y', 'Chromosome Y'),
     ('MT', 'Mitochondrial DNA'),
-    -- The Psuedo-autosomal regions are regions of the X and Y chromosomes
+    -- The Psuedoautosomal regions are regions of the X and Y chromosomes
     -- that share homology and thus recombine during meiosis. Variants in 
     -- these regions are mapped to both sex chromosomes.
     ('PAR', 'Pseudo-autosomal region'),
