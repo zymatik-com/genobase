@@ -96,7 +96,7 @@ func (db *DB) GetVariant(ctx context.Context, id int64) (*types.Variant, error) 
 	return &variant, nil
 }
 
-func (db *DB) GetVariants(ctx context.Context, chromosome string, position int64) ([]types.Variant, error) {
+func (db *DB) GetVariants(ctx context.Context, chromosome types.Chromosome, position int64) ([]types.Variant, error) {
 	rows, err := db.db.QueryxContext(ctx, "SELECT * FROM variant WHERE chromosome = ? AND position = ?",
 		chromosome, position)
 	if err != nil {

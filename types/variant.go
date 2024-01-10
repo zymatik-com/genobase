@@ -31,7 +31,7 @@ const (
 // Variant is a genomic variant (based on dbSNP).
 type Variant struct {
 	ID         int64        `db:"id"`         // Unique ID of the variant (RSID).
-	Chromosome string       `db:"chromosome"` // Chromosome on which the variant is located.
+	Chromosome Chromosome   `db:"chromosome"` // Chromosome on which the variant is located.
 	Position   int64        `db:"position"`   // Position of the variant on the chromosome.
 	Class      VariantClass `db:"class"`      // Class of the variant, e.g., SNV, INDEL, INS, DEL, MNV.
 }

@@ -14,19 +14,19 @@ package types
 
 // Chain is a chain of alignments between two genomes.
 type Chain struct {
-	ID          int64     `db:"id"`           // Unique ID of the chain.
-	Score       int64     `db:"score"`        // Alignment score.
-	Ref         Reference `db:"ref"`          // Reference genome assembly name.
-	RefName     string    `db:"ref_name"`     // Reference chromosome name.
-	RefSize     int64     `db:"ref_size"`     // Size of the reference chromosome in bases.
-	RefStrand   string    `db:"ref_strand"`   // Strand in the reference genome ('+' or '-').
-	RefStart    int64     `db:"ref_start"`    // Start position in the reference genome.
-	RefEnd      int64     `db:"ref_end"`      // End position in the reference genome.
-	QueryName   string    `db:"query_name"`   // Query chromosome name.
-	QuerySize   int64     `db:"query_size"`   // Size of the query chromosome in bases.
-	QueryStrand string    `db:"query_strand"` // Strand in the query genome ('+' or '-').
-	QueryStart  int64     `db:"query_start"`  // Start position in the query genome.
-	QueryEnd    int64     `db:"query_end"`    // End position in the query genome.
+	ID          int64      `db:"id"`           // Unique ID of the chain.
+	Score       int64      `db:"score"`        // Alignment score.
+	Ref         Reference  `db:"ref"`          // Reference genome assembly name.
+	RefName     Chromosome `db:"ref_name"`     // Reference chromosome name.
+	RefSize     int64      `db:"ref_size"`     // Size of the reference chromosome in bases.
+	RefStrand   string     `db:"ref_strand"`   // Strand in the reference genome ('+' or '-').
+	RefStart    int64      `db:"ref_start"`    // Start position in the reference genome.
+	RefEnd      int64      `db:"ref_end"`      // End position in the reference genome.
+	QueryName   Chromosome `db:"query_name"`   // Query chromosome name.
+	QuerySize   int64      `db:"query_size"`   // Size of the query chromosome in bases.
+	QueryStrand string     `db:"query_strand"` // Strand in the query genome ('+' or '-').
+	QueryStart  int64      `db:"query_start"`  // Start position in the query genome.
+	QueryEnd    int64      `db:"query_end"`    // End position in the query genome.
 }
 
 // Alignment is an alignment block between two genomes.

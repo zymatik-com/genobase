@@ -34,12 +34,12 @@ INSERT INTO chromosome (id, description) VALUES
     ('22', 'Chromosome 22'),
     ('X', 'Chromosome X'),
     ('Y', 'Chromosome Y'),
+    ('MT', 'Mitochondrial DNA'),
     -- The Psuedo-autosomal regions are regions of the X and Y chromosomes
     -- that share homology and thus recombine during meiosis. Variants in 
     -- these regions are mapped to both sex chromosomes.
     ('PAR', 'Pseudo-autosomal region'),
-    ('PAR2', 'Pseudo-autosomal region 2'),
-    ('MT', 'Mitochondrial DNA');
+    ('PAR2', 'Pseudo-autosomal region 2');
 
 -- The `variant_class` table stores information about the classes of
 -- variants, eg. SNV, INDEL, INS, DEL, MNV.

@@ -35,8 +35,7 @@ CREATE TABLE allele (
     -- Frequency of the allele in the ancestry group.
     frequency REAL,
     PRIMARY KEY (id, ref, alt, ancestry),
-    FOREIGN KEY (ancestry) REFERENCES ancestry_group (id)
-    
+    FOREIGN KEY (ancestry) REFERENCES ancestry_group (id)  
 );
 CREATE INDEX allele_id ON allele(id);
 
